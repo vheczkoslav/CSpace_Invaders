@@ -8,6 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/vboxuser/code/project/aliens.c" "CMakeFiles/main.dir/aliens.c.o" "gcc" "CMakeFiles/main.dir/aliens.c.o.d"
   "/home/vboxuser/code/project/main.c" "CMakeFiles/main.dir/main.c.o" "gcc" "CMakeFiles/main.dir/main.c.o.d"
   )
 

@@ -129,6 +129,30 @@ main/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
 .PHONY : main/fast
 
+aliens.o: aliens.c.o
+.PHONY : aliens.o
+
+# target to build an object file
+aliens.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/aliens.c.o
+.PHONY : aliens.c.o
+
+aliens.i: aliens.c.i
+.PHONY : aliens.i
+
+# target to preprocess a source file
+aliens.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/aliens.c.i
+.PHONY : aliens.c.i
+
+aliens.s: aliens.c.s
+.PHONY : aliens.s
+
+# target to generate assembly for a file
+aliens.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/aliens.c.s
+.PHONY : aliens.c.s
+
 main.o: main.c.o
 .PHONY : main.o
 
@@ -162,6 +186,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... main"
+	@echo "... aliens.o"
+	@echo "... aliens.i"
+	@echo "... aliens.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

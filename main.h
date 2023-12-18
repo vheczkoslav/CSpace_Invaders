@@ -14,6 +14,9 @@ const int TICK_LIMIT = 30; // TICK is never going to be slower than this
 
 int SHOOT_DELAY = 60; // player can shoot one sec after last shot
 
+const int A_ROWS = 5;
+const int A_IN_ROW = 11;
+
 void render(SDL_Renderer* renderer, int* cas);
 
 typedef struct{
@@ -25,19 +28,6 @@ typedef struct{
     int texture_width;
     int texture_height;
 }Player;
-
-int A_ROWS = 5;
-int A_IN_ROW = 11;
-typedef struct{
-    int x;
-    int y;
-    bool alive;
-    SDL_Texture* texture;
-    int texture_width;
-    int texture_height;
-    enum type {TOP_CLINGON, MID_VULCAN, BOT_REPTILIAN, UFO_SPECIAL};
-    int score; //depending on type
-}Alien;
 
 typedef struct{
     int x;

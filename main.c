@@ -9,12 +9,15 @@
 
 #include <SDL2/SDL.h>
 #include "main.h"
+#include "aliens.h"
 
-// gcc main.c start_pos.c -lSDL2 -lSDL2_image -g -fsanitize=address -o main && ./main
-// cmake . | make | ./main
+// gcc main.c aliens.c -lSDL2 -lSDL2_image -g -fsanitize=address -o main && ./main
+// cmake . && make && ./main
 
 void render(SDL_Renderer* renderer, int* cas){
     SDL_RenderClear(renderer);
+
+
     if(*cas % TICK == 0){
         printf("cas: %d\ntick count: %d\n", *cas, TICK_COUNT);
         TICK_COUNT++;
@@ -40,6 +43,8 @@ int main(){
 
     Alien* aliens;
     aliens = (Alien*)malloc(sizeof(Alien) * A_ROWS * A_IN_ROW);
+    a_start_pos(aliens, A_ROWS * A_IN_ROW);
+    add_a_textures(aliens, rend, A_ROWS * A_IN_ROW);
 
     while (running == 1)
     {
@@ -63,6 +68,7 @@ int main(){
         lastTime = currentTime;
     }
 
+    free_aliens(aliens, A_ROWS * A_IN_ROW);
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(rend);
     SDL_Quit();

@@ -1,1 +1,1 @@
-/usr/bin/cc CMakeFiles/main.dir/main.c.o -o main  -lSDL2 -lSDL2_image -lSDL2_ttf 
+/usr/bin/cc CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/aliens.c.o -o main  -lSDL2 -lSDL2_image -lSDL2_ttf 
