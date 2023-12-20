@@ -429,11 +429,11 @@ CMakeFiles/main.dir/main.c.o: main.c \
   /usr/include/SDL2/SDL_version.h \
   /usr/include/SDL2/SDL_locale.h \
   /usr/include/SDL2/SDL_misc.h \
+  /usr/include/SDL2/SDL_image.h \
+  /usr/include/SDL2/SDL.h \
   main.h \
   /usr/lib/gcc/x86_64-linux-gnu/11/include/stdbool.h \
   /usr/include/SDL2/SDL_ttf.h \
-  /usr/include/SDL2/SDL.h \
-  /usr/include/SDL2/SDL_image.h \
   aliens.h
 
 
