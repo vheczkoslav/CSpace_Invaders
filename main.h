@@ -20,7 +20,7 @@ int SHOOT_DELAY = 60; // player can shoot one sec after last shot
 const int A_ROWS = 5;
 const int A_IN_ROW = 11;
 
-void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* aliens);
+void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* aliens, TTF_Font* font);
 
 typedef struct{
     int x;

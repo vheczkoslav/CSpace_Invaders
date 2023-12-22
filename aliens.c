@@ -11,26 +11,26 @@ void a_start_pos(Alien *aliens, int count)
             {
                 case 0:
 
-                    setAlienStats(&aliens[i * j + j], j * 24, (i+1) * 28, 24, 28, i * j + j, TOP_KLINGON, 25);
+                    setAlienStats(&aliens[i * j + j], j * 51, (i+1) * 40, 24, 28, i * 11 + j, TOP_KLINGON, 25);
 
                     break;
                 case 1:
 
-                    setAlienStats(&aliens[i * j + j], j * 40, (i+1) * 28, 40, 28, i * j + j, MID_VULCAN, 20);
+                    setAlienStats(&aliens[i * j + j], j * 50, (i+1) * 40, 40, 28, i * 11 + j, MID_VULCAN, 20);
 
                     break;
                 case 2:
 
-                    setAlienStats(&aliens[i * j + j], j * 40, (i+1) * 28, 40, 28, i * j + j, MID_VULCAN, 15);
+                    setAlienStats(&aliens[i * j + j], j * 50, (i+1) * 40, 40, 28, i * 11 + j, MID_VULCAN, 15);
 
                 case 3:
 
-                    setAlienStats(&aliens[i * j + j], j * 40, (i+1) * 28, 40, 28, i * j + j, BOT_REPTILIAN, 10);
+                    setAlienStats(&aliens[i * j + j], j * 50, (i+1) * 40, 40, 28, i * 11 + j, BOT_REPTILIAN, 10);
 
                     break;
                 case 4:
 
-                    setAlienStats(&aliens[i * j + j], j * 40, (i+1) * 28, 40, 28, i * j + j, BOT_REPTILIAN, 5);
+                    setAlienStats(&aliens[i * j + j], j * 50, (i+1) * 40, 40, 28, i * 11 + j, BOT_REPTILIAN, 5);
 
                     break;
                 default:
@@ -64,4 +64,12 @@ void setAlienStats(Alien *aliens, int x, int y, int width, int height, int id, a
     aliens->score = score;
     aliens->alive = true;
     return;
+}
+
+void aliens_move(Alien *aliens, int count, int cas, int tick){
+    for(int i = 0; i < count; i++){
+        if(cas % tick == 0){
+            aliens[i].rect.x += 4;
+        }
+    }
 }

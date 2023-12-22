@@ -27,5 +27,6 @@ void a_start_pos(Alien *aliens, int count);
 // void kill_alien(Alien *aliens, int index);
 void free_aliens(Alien *aliens, int count);
 void setAlienStats(Alien *aliens, int x, int y, int width, int height, int id, alien_type type, int score);
+void aliens_move(Alien *aliens, int count, int cas, int tick);
 
 #endif // ALIENS_H
