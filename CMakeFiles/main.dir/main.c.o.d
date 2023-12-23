@@ -1,5 +1,7 @@
 CMakeFiles/main.dir/main.c.o: /home/vboxuser/code/project/main.c \
- /usr/include/stdc-predef.h /usr/include/SDL2/SDL.h \
+ /usr/include/stdc-predef.h /home/vboxuser/code/project/main.h \
+ /usr/lib/gcc/x86_64-linux-gnu/11/include/stdbool.h \
+ /usr/include/SDL2/SDL_ttf.h /usr/include/SDL2/SDL.h \
  /usr/include/SDL2/SDL_main.h /usr/include/SDL2/SDL_stdinc.h \
  /usr/include/SDL2/SDL_config.h \
  /usr/include/x86_64-linux-gnu/SDL2/_real_SDL_config.h \
@@ -174,7 +176,5 @@ CMakeFiles/main.dir/main.c.o: /home/vboxuser/code/project/main.c \
  /usr/include/SDL2/SDL_shape.h /usr/include/SDL2/SDL_system.h \
  /usr/include/SDL2/SDL_timer.h /usr/include/SDL2/SDL_version.h \
  /usr/include/SDL2/SDL_locale.h /usr/include/SDL2/SDL_misc.h \
- /usr/include/SDL2/SDL_image.h /usr/include/SDL2/SDL.h \
- /home/vboxuser/code/project/main.h \
- /usr/lib/gcc/x86_64-linux-gnu/11/include/stdbool.h \
- /usr/include/SDL2/SDL_ttf.h /home/vboxuser/code/project/aliens.h
+ /usr/include/SDL2/SDL_image.h /home/vboxuser/code/project/aliens.h \
+ /usr/include/SDL2/SDL.h

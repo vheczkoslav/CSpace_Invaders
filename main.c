@@ -7,27 +7,30 @@
 // ##### #     #   # ##### #####   ##### #    #   #   #   # ####  ##### #   # #####  //
 ///////////////////////////////////////////////////////////////////////////////////////
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
 #include "main.h"
 #include "aliens.h"
+#include <SDL2/SDL.h>
 
 // gcc main.c aliens.c -lSDL2 -lSDL2_image -g -fsanitize=address -o main && ./main
 // cmake . && make && ./main
 
-void render(SDL_Renderer *renderer, int *cas, SDL_Texture** textures, Alien* aliens, TTF_Font* font)
+void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* alienz, TTF_Font* font, Player* p)
 {
     SDL_RenderClear(renderer);
 
-    char text[50];
-    snprintf(text, 50, "SCORE: %d", SCORE);
-    SDL_Color text_color = {255,255,255,255};
-    SDL_Surface* text_surface = TTF_RenderText_Solid(font, text, text_color);
-    SDL_Texture* text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-    SDL_Rect text_rect = {.x = 0, .y = 0};
-    text_rect.h = 60;
-    text_rect.w = 300; // 20 * strlen(text);
-    SDL_RenderCopyEx(renderer, text_texture, NULL, &text_rect, 0, NULL, SDL_FLIP_NONE);
+    char score_text[50];
+    snprintf(score_text, 50, "SCORE: %d", SCORE);
+    SDL_Color score_color = {255, 255, 255, 255};
+    SDL_Surface* score_surface = TTF_RenderText_Solid(font, score_text, score_color);
+    SDL_Texture* score_texture = SDL_CreateTextureFromSurface(renderer, score_surface);
+    SDL_Rect score_rect = {.x = 0, .y = 0};
+    score_rect.h = 30;
+    score_rect.w = 150; // 20 * strlen(score_text);
+    SDL_RenderCopyEx(renderer, score_texture, NULL, &score_rect, 0, NULL, SDL_FLIP_NONE);
+
+    if(p->alive == true){
+        SDL_RenderCopy(renderer, textures[7], NULL, &p->rect);
+    }
 
     for(int i = 0; i < A_ROWS * A_IN_ROW; i++){
         if(aliens[i].alive == true){
@@ -41,7 +44,7 @@ void render(SDL_Renderer *renderer, int *cas, SDL_Texture** textures, Alien* ali
     }
 
     SDL_RenderPresent(renderer);
-    SDL_DestroyTexture(text_texture); SDL_FreeSurface(text_surface);
+    SDL_DestroyTexture(score_texture); SDL_FreeSurface(score_surface);
     return;
 }
 
@@ -88,7 +91,14 @@ int main()
     aliens = (Alien *)malloc(sizeof(Alien) * A_ROWS * A_IN_ROW);
     a_start_pos(aliens, A_ROWS * A_IN_ROW);
 
-    TTF_Font* font = TTF_OpenFont("fonts/PressStart2P-Regular.ttf", 24);
+    Player p = {.rect.x = WIN_WID / 2 - 9, .rect.y = WIN_HEI - 36, .alive = true, .rect.w = 36, .rect.h = 24};
+
+    TTF_Init();
+    TTF_Font* font = TTF_OpenFont("fonts/space_invaders.ttf", 18);
+    if(font == NULL){
+        perror("Font not loaded correctly!\n");
+        return 1;
+    }
 
     while (running == 1)
     {
@@ -106,6 +116,7 @@ int main()
             else if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT) { // mouse button released
                 // x: e.button.button.x
                 // y: e.button.button.y
+
             }
         }
         Uint32 currentTime = SDL_GetTicks();
@@ -116,11 +127,11 @@ int main()
             SDL_Delay(targetFrameTime - deltaTime);
         }
 
-        render(rend, &cas, textures, aliens, font);
-        aliens_move(aliens, A_ROWS * A_IN_ROW, cas, TICK);
+        render(rend, &cas, textures, aliens, font, &p);
 
         if (cas % TICK == 0)
         {
+            aliens_move(aliens, A_ROWS * A_IN_ROW, TICK_COUNT);
             printf("cas: %d\ntick count: %d\n", cas, TICK_COUNT);
             TICK_COUNT++;
         }

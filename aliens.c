@@ -66,10 +66,16 @@ void setAlienStats(Alien *aliens, int x, int y, int width, int height, int id, a
     return;
 }
 
-void aliens_move(Alien *aliens, int count, int cas, int tick){
+void aliens_move(Alien *aliens, int count, int tick){
     for(int i = 0; i < count; i++){
-        if(cas % tick == 0){
-            aliens[i].rect.x += 4;
+        if((tick / 18) % 2 == 0 && tick % 18 != 0){
+            aliens[i].rect.x += 6;
+        }
+        if((tick / 18) % 2 == 1 && tick % 18 != 0){
+            aliens[i].rect.x -= 6;
+        }
+        if(tick % 18 == 0){
+            aliens[i].rect.y += 8;
         }
     }
 }
