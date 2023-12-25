@@ -14,37 +14,57 @@
 // gcc main.c aliens.c -lSDL2 -lSDL2_image -g -fsanitize=address -o main && ./main
 // cmake . && make && ./main
 
-void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* alienz, TTF_Font* font, Player* p)
+void player_move(Player* player, enum direction d){
+    if(d == LEFT && player->rect.x > 12){
+        player->rect.x -= 5;
+    }
+    if(d == RIGHT && player->rect.x < WIN_WID-player->rect.w-12){
+        player->rect.x += 5;
+    }
+}
+
+void info_text(SDL_Renderer *renderer, TTF_Font *font, char* text, int DATA, int r){
+    char buffer_text[40];
+    snprintf(buffer_text, 40, "%s: %d", text, SCORE);
+    SDL_Color buffer_color = {255, 255, 255, 255};
+    SDL_Surface* buffer_surface = TTF_RenderText_Solid(font, buffer_text, buffer_color);
+    SDL_Texture* buffer_texture = SDL_CreateTextureFromSurface(renderer, buffer_surface);
+    SDL_Rect buffer_rect = {.x = r, .y = 0};
+    buffer_rect.h = 30;
+    buffer_rect.w = 150; // 20 * strlen(score_text);
+    SDL_RenderCopyEx(renderer, buffer_texture, NULL, &buffer_rect, 0, NULL, SDL_FLIP_NONE);
+
+    SDL_DestroyTexture(buffer_texture); SDL_FreeSurface(buffer_surface);
+}
+
+void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* alienz, TTF_Font* font, Player* p, Shield* shieldz)
 {
     SDL_RenderClear(renderer);
 
-    char score_text[50];
-    snprintf(score_text, 50, "SCORE: %d", SCORE);
-    SDL_Color score_color = {255, 255, 255, 255};
-    SDL_Surface* score_surface = TTF_RenderText_Solid(font, score_text, score_color);
-    SDL_Texture* score_texture = SDL_CreateTextureFromSurface(renderer, score_surface);
-    SDL_Rect score_rect = {.x = 0, .y = 0};
-    score_rect.h = 30;
-    score_rect.w = 150; // 20 * strlen(score_text);
-    SDL_RenderCopyEx(renderer, score_texture, NULL, &score_rect, 0, NULL, SDL_FLIP_NONE);
+    info_text(renderer, font, "SCORE", SCORE, 0);
+    info_text(renderer, font, "LVL", LVL, 325);
+    info_text(renderer, font, "LIVES", LIVES, 650);
 
     if(p->alive == true){
         SDL_RenderCopy(renderer, textures[7], NULL, &p->rect);
     }
 
     for(int i = 0; i < A_ROWS * A_IN_ROW; i++){
-        if(aliens[i].alive == true){
+        if(alienz[i].alive == true){
             // [0] - [5] -> top1/2, mid1/2, bot1/2
             int id = 0;
-            if(aliens[i].id >= 0 && aliens[i].id < 11){ id = 0; }
-            if(aliens[i].id >= 11 && aliens[i].id < 32){ id = 2; }
-            if(aliens[i].id >= 32 && aliens[i].id < 54){ id = 4; }
-            SDL_RenderCopy(renderer, textures[id + (TICK_COUNT % 2)], NULL, &aliens[i].rect);
+            if(alienz[i].id >= 0 && alienz[i].id < 11){ id = 0; }
+            if(alienz[i].id >= 11 && alienz[i].id < 32){ id = 2; }
+            if(alienz[i].id >= 32 && alienz[i].id < 54){ id = 4; }
+            SDL_RenderCopy(renderer, textures[id + (TICK_COUNT % 2)], NULL, &alienz[i].rect);
         }
     }
 
+    for(int i = 0; i < 4; i++){
+        SDL_RenderCopy(renderer, textures[8], NULL, &shieldz[i].rect);
+    }
+
     SDL_RenderPresent(renderer);
-    SDL_DestroyTexture(score_texture); SDL_FreeSurface(score_surface);
     return;
 }
 
@@ -93,6 +113,14 @@ int main()
 
     Player p = {.rect.x = WIN_WID / 2 - 9, .rect.y = WIN_HEI - 36, .alive = true, .rect.w = 36, .rect.h = 24};
 
+    shields = (Shield *)malloc(sizeof(Shield) * 4);
+    for(int s = 0; s < 4; ++s){
+        shields[s].rect.w = 18 * 4;
+        shields[s].rect.h = 16 * 4;
+        shields[s].rect.y = WIN_HEI - 144;
+    }
+    shields[0].rect.x = 100; shields[1].rect.x = 275; shields[2].rect.x = 450; shields[3].rect.x = 625;
+
     TTF_Init();
     TTF_Font* font = TTF_OpenFont("fonts/space_invaders.ttf", 18);
     if(font == NULL){
@@ -112,11 +140,21 @@ int main()
                 if ( event.key.keysym.sym == SDLK_r ) {
                     running = 0;
                 }
+                if( event.key.keysym.sym == SDLK_LEFT ){
+                        player_move(&p, LEFT);
+                }
+                if( event.key.keysym.sym == SDLK_RIGHT ){
+                        player_move(&p, RIGHT);
+                }
             }
-            else if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT) { // mouse button released
-                // x: e.button.button.x
-                // y: e.button.button.y
-
+            else if( event.type == SDL_KEYUP ){
+                if( event.key.keysym.sym == SDLK_SPACE ){
+                    if(SHOOT_DELAY == 180){
+                        // player_shoot();
+                        SHOOT_DELAY = 0;
+                        printf("Shoot!\n");
+                    }
+                }
             }
         }
         Uint32 currentTime = SDL_GetTicks();
@@ -127,15 +165,18 @@ int main()
             SDL_Delay(targetFrameTime - deltaTime);
         }
 
-        render(rend, &cas, textures, aliens, font, &p);
+        render(rend, &cas, textures, aliens, font, &p, shields);
 
         if (cas % TICK == 0)
         {
             aliens_move(aliens, A_ROWS * A_IN_ROW, TICK_COUNT);
-            printf("cas: %d\ntick count: %d\n", cas, TICK_COUNT);
+            //printf("cas: %d\ntick count: %d\n", cas, TICK_COUNT);
             TICK_COUNT++;
         }
         cas++;
+        if(SHOOT_DELAY != 180){
+            SHOOT_DELAY++;
+        }
 
         lastTime = currentTime;
     }
