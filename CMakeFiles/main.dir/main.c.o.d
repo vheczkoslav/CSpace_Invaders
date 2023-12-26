@@ -177,4 +177,5 @@ CMakeFiles/main.dir/main.c.o: /home/vboxuser/code/project/main.c \
  /usr/include/SDL2/SDL_timer.h /usr/include/SDL2/SDL_version.h \
  /usr/include/SDL2/SDL_locale.h /usr/include/SDL2/SDL_misc.h \
  /usr/include/SDL2/SDL_image.h /home/vboxuser/code/project/aliens.h \
- /usr/include/SDL2/SDL.h
+ /usr/include/SDL2/SDL.h /home/vboxuser/code/project/dynamic_array.h \
+ /usr/include/SDL2/SDL_mixer.h

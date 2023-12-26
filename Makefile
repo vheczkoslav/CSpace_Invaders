@@ -153,6 +153,30 @@ aliens.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/aliens.c.s
 .PHONY : aliens.c.s
 
+dynamic_array.o: dynamic_array.c.o
+.PHONY : dynamic_array.o
+
+# target to build an object file
+dynamic_array.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/dynamic_array.c.o
+.PHONY : dynamic_array.c.o
+
+dynamic_array.i: dynamic_array.c.i
+.PHONY : dynamic_array.i
+
+# target to preprocess a source file
+dynamic_array.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/dynamic_array.c.i
+.PHONY : dynamic_array.c.i
+
+dynamic_array.s: dynamic_array.c.s
+.PHONY : dynamic_array.s
+
+# target to generate assembly for a file
+dynamic_array.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/dynamic_array.c.s
+.PHONY : dynamic_array.c.s
+
 main.o: main.c.o
 .PHONY : main.o
 
@@ -189,6 +213,9 @@ help:
 	@echo "... aliens.o"
 	@echo "... aliens.i"
 	@echo "... aliens.s"
+	@echo "... dynamic_array.o"
+	@echo "... dynamic_array.i"
+	@echo "... dynamic_array.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"

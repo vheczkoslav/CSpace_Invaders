@@ -5,6 +5,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
+#include "dynamic_array.h"
 
 typedef enum
 {
@@ -28,5 +29,12 @@ void a_start_pos(Alien *aliens, int count);
 void free_aliens(Alien *aliens, int count);
 void setAlienStats(Alien *aliens, int x, int y, int width, int height, int id, alien_type type, int score);
 void aliens_move(Alien *aliens, int count, int tick);
+//void alien_shoot(Alien* aliens);
+
+typedef struct{
+    SDL_Rect rect; // x*y - 4*12
+    bool active;
+    int shooter; // 0 for P, 1 for A
+}Shot;
 
 #endif // ALIENS_H

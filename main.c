@@ -16,11 +16,23 @@
 
 void player_move(Player* player, enum direction d){
     if(d == LEFT && player->rect.x > 12){
-        player->rect.x -= 5;
+        player->rect.x -= 2;
     }
     if(d == RIGHT && player->rect.x < WIN_WID-player->rect.w-12){
-        player->rect.x += 5;
+        player->rect.x += 2;
     }
+    if( d == NONE){  }
+}
+
+void player_shoot(Player* player, dynarray* projectilez){
+    Shot* s; s = (Shot*)malloc(sizeof(Shot));
+    s->rect.x = player->rect.x + 16;
+    s->rect.y = player->rect.y - 12;
+    s->rect.w = 4;
+    s->rect.h = 12;
+    s->active = true;
+    s->shooter = 0;
+    dynarray_push(projectilez, s);
 }
 
 void info_text(SDL_Renderer *renderer, TTF_Font *font, char* text, int DATA, int r){
@@ -37,13 +49,20 @@ void info_text(SDL_Renderer *renderer, TTF_Font *font, char* text, int DATA, int
     SDL_DestroyTexture(buffer_texture); SDL_FreeSurface(buffer_surface);
 }
 
-void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* alienz, TTF_Font* font, Player* p, Shield* shieldz)
+void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* alienz, TTF_Font* font, Player* p, Shield* shieldz, dynarray* projectilez)
 {
     SDL_RenderClear(renderer);
 
     info_text(renderer, font, "SCORE", SCORE, 0);
     info_text(renderer, font, "LVL", LVL, 325);
     info_text(renderer, font, "LIVES", LIVES, 650);
+
+    for(int p = 0; p < projectilez->size; p++){
+        Shot* currentShot = (Shot*) projectilez->items[p];
+        if(currentShot->shooter == 0 && currentShot->active == true){
+            SDL_RenderCopy(renderer, textures[9], NULL, &currentShot->rect);
+        }
+    }
 
     if(p->alive == true){
         SDL_RenderCopy(renderer, textures[7], NULL, &p->rect);
@@ -52,11 +71,11 @@ void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* ali
     for(int i = 0; i < A_ROWS * A_IN_ROW; i++){
         if(alienz[i].alive == true){
             // [0] - [5] -> top1/2, mid1/2, bot1/2
-            int id = 0;
-            if(alienz[i].id >= 0 && alienz[i].id < 11){ id = 0; }
-            if(alienz[i].id >= 11 && alienz[i].id < 32){ id = 2; }
-            if(alienz[i].id >= 32 && alienz[i].id < 54){ id = 4; }
-            SDL_RenderCopy(renderer, textures[id + (TICK_COUNT % 2)], NULL, &alienz[i].rect);
+            int index = 0;
+            if(alienz[i].id >= 0 && alienz[i].id < 11){ index = 0; } // 0 - 10 (11)
+            if(alienz[i].id >= 11 && alienz[i].id < 33){ index = 2; } // 11 - 32 (22)
+            if(alienz[i].id >= 33 && alienz[i].id < 55){ index = 4; } // 33 - 54 (22)
+            SDL_RenderCopy(renderer, textures[index + (TICK_COUNT % 2)], NULL, &alienz[i].rect);
         }
     }
 
@@ -81,7 +100,7 @@ int main()
     SDL_Renderer *rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     SDL_Event event;
 
-    SDL_Texture *textures[9];
+    SDL_Texture *textures[11];
     SDL_Surface *tmp = IMG_Load("sprites/top1.png");
     textures[0] = SDL_CreateTextureFromSurface(rend, tmp);
     tmp = IMG_Load("sprites/top2.png");
@@ -100,6 +119,10 @@ int main()
     textures[7] = SDL_CreateTextureFromSurface(rend, tmp);
     tmp = IMG_Load("sprites/shield.png");
     textures[8] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/shot_pl.png");
+    textures[9] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/shot_al.png");
+    textures[10] = SDL_CreateTextureFromSurface(rend, tmp);
 
     int running = 1;
     int cas = 0;
@@ -121,6 +144,9 @@ int main()
     }
     shields[0].rect.x = 100; shields[1].rect.x = 275; shields[2].rect.x = 450; shields[3].rect.x = 625;
 
+    dynarray projectiles;
+    dynarray_init(&projectiles, 1);
+
     TTF_Init();
     TTF_Font* font = TTF_OpenFont("fonts/space_invaders.ttf", 18);
     if(font == NULL){
@@ -128,6 +154,7 @@ int main()
         return 1;
     }
 
+    enum direction dir = NONE;
     while (running == 1)
     {
         while (SDL_PollEvent(&event))
@@ -141,22 +168,27 @@ int main()
                     running = 0;
                 }
                 if( event.key.keysym.sym == SDLK_LEFT ){
-                        player_move(&p, LEFT);
+                        MOVING = true; dir = LEFT;
                 }
                 if( event.key.keysym.sym == SDLK_RIGHT ){
-                        player_move(&p, RIGHT);
+                        MOVING = true; dir = RIGHT;
                 }
             }
             else if( event.type == SDL_KEYUP ){
                 if( event.key.keysym.sym == SDLK_SPACE ){
                     if(SHOOT_DELAY == 180){
-                        // player_shoot();
+                        player_shoot(&p, &projectiles);
                         SHOOT_DELAY = 0;
-                        printf("Shoot!\n");
+                        //printf("Shoot!\n");
                     }
+                }
+                if( event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_RIGHT){
+                    MOVING = false; dir = NONE;
                 }
             }
         }
+        player_move(&p, dir);
+
         Uint32 currentTime = SDL_GetTicks();
         deltaTime = currentTime - lastTime;
 
@@ -165,7 +197,7 @@ int main()
             SDL_Delay(targetFrameTime - deltaTime);
         }
 
-        render(rend, &cas, textures, aliens, font, &p, shields);
+        render(rend, &cas, textures, aliens, font, &p, shields, &projectiles);
 
         if (cas % TICK == 0)
         {
