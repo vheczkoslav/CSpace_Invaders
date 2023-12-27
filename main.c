@@ -30,14 +30,56 @@ void player_shoot(Player* player, dynarray* projectilez){
     s->rect.y = player->rect.y - 12;
     s->rect.w = 4;
     s->rect.h = 12;
-    s->active = true;
     s->shooter = 0;
     dynarray_push(projectilez, s);
 }
 
+void shoot_move(dynarray* projectilez, Player* p, int* lives){
+    // This function is also handling collision check in addition to movement
+    for(int i = 0; i < projectilez->size; i++){
+        Shot* currentShot = (Shot*) projectilez->items[i];
+        if(currentShot->shooter == 0){
+            for(int j = 0; j < A_ROWS * A_IN_ROW; j++){
+                if(currentShot->rect.x >= aliens[j].rect.x && currentShot->rect.x <= aliens[j].rect.x + aliens[j].rect.w
+                && currentShot->rect.y >= aliens[j].rect.y && currentShot->rect.y <= aliens[j].rect.y && aliens[j].alive == true){
+                    kill_alien(aliens, j, &SCORE);
+                    dynarray_remove(projectilez, currentShot);
+                    break;
+                }
+            }
+            for(int j = 0; j < 4; j++){
+                if(currentShot->rect.x >= shields[j].rect.x && currentShot->rect.x <= shields[j].rect.x + shields[j].rect.w
+                && currentShot->rect.y >= shields[j].rect.y && currentShot->rect.y <= shields[j].rect.y){
+                    dynarray_remove(projectilez, currentShot);
+                }
+            }
+            if(currentShot->rect.y == 12){ dynarray_remove(projectilez, currentShot); }
+            else{ currentShot->rect.y -= 2; } // no collision
+        }
+        else{
+            for(int j = 0; j < 4; j++){
+                if(currentShot->rect.x >= shields[j].rect.x && currentShot->rect.x <= shields[j].rect.x + shields[j].rect.w
+                   && currentShot->rect.y >= shields[j].rect.y && currentShot->rect.y <= shields[j].rect.y){
+                    dynarray_remove(projectilez, currentShot);
+                }
+            }
+            if(currentShot->rect.y == WIN_HEI - 36){ dynarray_remove(projectilez, currentShot); }
+            /*if(currentShot->rect.x >= p->rect.x &&
+               currentShot->rect.x <= p->rect.x + p->rect.w &&
+               currentShot->rect.y >= p->rect.y &&
+               currentShot->rect.y <= p->rect.y + p->rect.h){
+                dynarray_remove(projectilez, currentShot);
+                a_start_pos(aliens, A_ROWS * A_IN_ROW);
+                (*lives)--;
+            }*/
+            else{ currentShot->rect.y += 2; }
+        }
+    }
+}
+
 void info_text(SDL_Renderer *renderer, TTF_Font *font, char* text, int DATA, int r){
     char buffer_text[40];
-    snprintf(buffer_text, 40, "%s: %d", text, SCORE);
+    snprintf(buffer_text, 40, "%s: %d", text, DATA);
     SDL_Color buffer_color = {255, 255, 255, 255};
     SDL_Surface* buffer_surface = TTF_RenderText_Solid(font, buffer_text, buffer_color);
     SDL_Texture* buffer_texture = SDL_CreateTextureFromSurface(renderer, buffer_surface);
@@ -59,8 +101,11 @@ void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* ali
 
     for(int p = 0; p < projectilez->size; p++){
         Shot* currentShot = (Shot*) projectilez->items[p];
-        if(currentShot->shooter == 0 && currentShot->active == true){
+        if(currentShot->shooter == 0){
             SDL_RenderCopy(renderer, textures[9], NULL, &currentShot->rect);
+        }
+        if(currentShot->shooter == 1){
+            SDL_RenderCopy(renderer, textures[10], NULL, &currentShot->rect);
         }
     }
 
@@ -155,7 +200,7 @@ int main()
     }
 
     enum direction dir = NONE;
-    while (running == 1)
+    while (running == 1 && LIVES > 0)
     {
         while (SDL_PollEvent(&event))
         {
@@ -188,6 +233,7 @@ int main()
             }
         }
         player_move(&p, dir);
+        shoot_move(&projectiles, &p, &LIVES);
 
         Uint32 currentTime = SDL_GetTicks();
         deltaTime = currentTime - lastTime;
@@ -198,6 +244,10 @@ int main()
         }
 
         render(rend, &cas, textures, aliens, font, &p, shields, &projectiles);
+
+        if(cas % 240 == 0){
+            alien_shoot(aliens, &projectiles);
+        }
 
         if (cas % TICK == 0)
         {
@@ -213,10 +263,10 @@ int main()
         lastTime = currentTime;
     }
 
-    for (int i = 0; i < 9; i++)
+    for (int i = 0; i < 11; i++)
         SDL_DestroyTexture(textures[i]);
 
-    free_aliens(aliens, A_ROWS * A_IN_ROW);
+    free_aliens(aliens);
     TTF_CloseFont(font);
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(rend);

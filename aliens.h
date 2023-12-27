@@ -2,6 +2,7 @@
 #define ALIENS_H
 
 #include <stdbool.h>
+#include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
@@ -25,15 +26,14 @@ typedef struct
 }Alien;
 
 void a_start_pos(Alien *aliens, int count);
-// void kill_alien(Alien *aliens, int index);
-void free_aliens(Alien *aliens, int count);
+void kill_alien(Alien *aliens, int index, int* SCORE);
+void free_aliens(Alien *aliens);
 void setAlienStats(Alien *aliens, int x, int y, int width, int height, int id, alien_type type, int score);
 void aliens_move(Alien *aliens, int count, int tick);
-//void alien_shoot(Alien* aliens);
+void alien_shoot(Alien *aliens, dynarray* projectilez);
 
 typedef struct{
     SDL_Rect rect; // x*y - 4*12
-    bool active;
     int shooter; // 0 for P, 1 for A
 }Shot;
 

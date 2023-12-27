@@ -32,12 +32,14 @@ void a_start_pos(Alien *aliens, int count)
     return;
 }
 
-void kill_alien(Alien *aliens, int index)
+void kill_alien(Alien *aliens, int index, int* SCORE)
 {
+    aliens[index].alive = false;
+    *SCORE += aliens[index].score;
     return;
 }
 
-void free_aliens(Alien *aliens, int count)
+void free_aliens(Alien *aliens)
 {
     free(aliens);
     return;
@@ -68,4 +70,20 @@ void aliens_move(Alien *aliens, int count, int tick){
             aliens[i].rect.y += 8;
         }
     }
+}
+
+void alien_shoot(Alien *aliens, dynarray* projectilez){
+    int index = rand() % 55;
+    Shot* s; s = (Shot*)malloc(sizeof(Shot));
+    if(index > 11){
+        s->rect.x = aliens[index].rect.x + 12;
+    }
+    else{
+        s->rect.x = aliens[index].rect.x + 20;
+    }
+    s->rect.y = aliens[index].rect.y - 14;
+    s->rect.w = 4;
+    s->rect.h = 12;
+    s->shooter = 1;
+    dynarray_push(projectilez, s);
 }

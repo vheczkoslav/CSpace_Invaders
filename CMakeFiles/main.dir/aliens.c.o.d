@@ -177,4 +177,5 @@ CMakeFiles/main.dir/aliens.c.o: /home/vboxuser/code/project/aliens.c \
  /home/vboxuser/code/project/aliens.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdbool.h \
  /usr/include/SDL2/SDL_ttf.h /usr/include/SDL2/SDL.h \
- /usr/include/SDL2/SDL_image.h
+ /usr/include/SDL2/SDL_image.h \
+ /home/vboxuser/code/project/dynamic_array.h

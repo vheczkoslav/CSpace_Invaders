@@ -41,3 +41,4 @@ void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* ali
 void player_move(Player* player, enum direction d);
 void info_text(SDL_Renderer *renderer, TTF_Font *font, char* text, int DATA, int r);
 void player_shoot(Player* player, dynarray* projectilez);
+void shoot_move(dynarray* projectilez, Player* p, int* lives);
