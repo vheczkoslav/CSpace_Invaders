@@ -6,6 +6,8 @@
 
 Alien* aliens;
 
+bool GAME = false; // if game is false you are in menu, if true you are in game. You are in menu before start or after death.
+
 const int WIN_WID = 800;
 const int WIN_HEI = 700;
 

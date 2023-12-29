@@ -63,15 +63,22 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                     dynarray_remove(projectilez, currentShot);
                 }
             }
-            if(currentShot->rect.y == WIN_HEI - 36){ dynarray_remove(projectilez, currentShot); }
-            /*if(currentShot->rect.x >= p->rect.x &&
+            if(currentShot->rect.y == WIN_HEI - 24){ dynarray_remove(projectilez, currentShot); }
+            if(currentShot->rect.x >= p->rect.x &&
                currentShot->rect.x <= p->rect.x + p->rect.w &&
                currentShot->rect.y >= p->rect.y &&
                currentShot->rect.y <= p->rect.y + p->rect.h){
                 dynarray_remove(projectilez, currentShot);
                 a_start_pos(aliens, A_ROWS * A_IN_ROW);
                 (*lives)--;
-            }*/
+                for(int k = 0; k < projectilez->size; k++){
+                    Shot* current_projectile = (Shot*) projectilez->items[k];
+                    dynarray_remove(projectilez, current_projectile);
+                }
+                if((*lives) == 0){
+                    GAME = false;
+                }
+            }
             else{ currentShot->rect.y += 2; }
         }
     }
@@ -145,7 +152,7 @@ int main()
     SDL_Renderer *rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     SDL_Event event;
 
-    SDL_Texture *textures[11];
+    SDL_Texture *textures[12];
     SDL_Surface *tmp = IMG_Load("sprites/top1.png");
     textures[0] = SDL_CreateTextureFromSurface(rend, tmp);
     tmp = IMG_Load("sprites/top2.png");
@@ -168,6 +175,8 @@ int main()
     textures[9] = SDL_CreateTextureFromSurface(rend, tmp);
     tmp = IMG_Load("sprites/shot_al.png");
     textures[10] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/menu.png");
+    textures[11] = SDL_CreateTextureFromSurface(rend, tmp);
 
     int running = 1;
     int cas = 0;
@@ -199,69 +208,96 @@ int main()
         return 1;
     }
 
-    enum direction dir = NONE;
-    while (running == 1 && LIVES > 0)
-    {
-        while (SDL_PollEvent(&event))
+    SDL_Rect menu_rect = {0,0,800,700};
+
+        enum direction dir = NONE;
+        while (running == 1)
         {
-            if (event.type == SDL_QUIT)
-            {
-                running = 0;
-            }
-            else if ( event.type == SDL_KEYDOWN ) { // key pressed down
-                if ( event.key.keysym.sym == SDLK_r ) {
-                    running = 0;
-                }
-                if( event.key.keysym.sym == SDLK_LEFT ){
-                        MOVING = true; dir = LEFT;
-                }
-                if( event.key.keysym.sym == SDLK_RIGHT ){
-                        MOVING = true; dir = RIGHT;
-                }
-            }
-            else if( event.type == SDL_KEYUP ){
-                if( event.key.keysym.sym == SDLK_SPACE ){
-                    if(SHOOT_DELAY == 180){
-                        player_shoot(&p, &projectiles);
-                        SHOOT_DELAY = 0;
-                        //printf("Shoot!\n");
+            if(!GAME){
+                SDL_RenderClear(rend);
+                while(SDL_PollEvent(&event)){
+                    if( event.type == SDL_KEYDOWN ){
+                        if( event.key.keysym.sym == SDLK_SPACE){
+                            GAME = true;
+                        }
                     }
                 }
-                if( event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_RIGHT){
-                    MOVING = false; dir = NONE;
+
+                Uint32 currentTime = SDL_GetTicks();
+                deltaTime = currentTime - lastTime;
+
+                if (deltaTime < targetFrameTime)
+                {
+                    SDL_Delay(targetFrameTime - deltaTime);
                 }
+
+                SDL_RenderCopy(rend, textures[11], NULL, &menu_rect);
+                SDL_RenderPresent(rend);
+
+                lastTime = currentTime;
+            }
+            else{
+                while (SDL_PollEvent(&event))
+                {
+                    if (event.type == SDL_QUIT)
+                    {
+                        running = 0;
+                    }
+                    else if ( event.type == SDL_KEYDOWN ) { // key pressed down
+                        if ( event.key.keysym.sym == SDLK_r ) {
+                            running = 0;
+                        }
+                        if( event.key.keysym.sym == SDLK_LEFT ){
+                            MOVING = true; dir = LEFT;
+                        }
+                        if( event.key.keysym.sym == SDLK_RIGHT ){
+                            MOVING = true; dir = RIGHT;
+                        }
+                    }
+                    else if( event.type == SDL_KEYUP ){
+                        if( event.key.keysym.sym == SDLK_SPACE ){
+                            if(SHOOT_DELAY == 180){
+                                player_shoot(&p, &projectiles);
+                                SHOOT_DELAY = 0;
+                                //printf("Shoot!\n");
+                            }
+                        }
+                        if( event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_RIGHT){
+                            MOVING = false; dir = NONE;
+                        }
+                    }
+                }
+                player_move(&p, dir);
+                shoot_move(&projectiles, &p, &LIVES);
+
+                Uint32 currentTime = SDL_GetTicks();
+                deltaTime = currentTime - lastTime;
+
+                if (deltaTime < targetFrameTime)
+                {
+                    SDL_Delay(targetFrameTime - deltaTime);
+                }
+
+                render(rend, &cas, textures, aliens, font, &p, shields, &projectiles);
+
+                if(cas % 240 == 0){
+                    alien_shoot(aliens, &projectiles);
+                }
+
+                if (cas % TICK == 0)
+                {
+                    aliens_move(aliens, A_ROWS * A_IN_ROW, TICK_COUNT);
+                    //printf("cas: %d\ntick count: %d\n", cas, TICK_COUNT);
+                    TICK_COUNT++;
+                }
+                cas++;
+                if(SHOOT_DELAY != 180){
+                    SHOOT_DELAY++;
+                }
+
+                lastTime = currentTime;
             }
         }
-        player_move(&p, dir);
-        shoot_move(&projectiles, &p, &LIVES);
-
-        Uint32 currentTime = SDL_GetTicks();
-        deltaTime = currentTime - lastTime;
-
-        if (deltaTime < targetFrameTime)
-        {
-            SDL_Delay(targetFrameTime - deltaTime);
-        }
-
-        render(rend, &cas, textures, aliens, font, &p, shields, &projectiles);
-
-        if(cas % 240 == 0){
-            alien_shoot(aliens, &projectiles);
-        }
-
-        if (cas % TICK == 0)
-        {
-            aliens_move(aliens, A_ROWS * A_IN_ROW, TICK_COUNT);
-            //printf("cas: %d\ntick count: %d\n", cas, TICK_COUNT);
-            TICK_COUNT++;
-        }
-        cas++;
-        if(SHOOT_DELAY != 180){
-            SHOOT_DELAY++;
-        }
-
-        lastTime = currentTime;
-    }
 
     for (int i = 0; i < 11; i++)
         SDL_DestroyTexture(textures[i]);
