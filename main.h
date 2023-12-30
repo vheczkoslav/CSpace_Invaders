@@ -35,6 +35,7 @@ typedef struct{
 typedef struct{
     SDL_Rect rect;
     // (18x16) * 4
+    bool destroyed;
 }Shield;
 
 Shield* shields;
@@ -44,3 +45,4 @@ void player_move(Player* player, enum direction d);
 void info_text(SDL_Renderer *renderer, TTF_Font *font, char* text, int DATA, int r);
 void player_shoot(Player* player, dynarray* projectilez);
 void shoot_move(dynarray* projectilez, Player* p, int* lives);
+void shield_damage(int index);

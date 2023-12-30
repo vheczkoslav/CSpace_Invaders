@@ -14,6 +14,15 @@
 // gcc main.c aliens.c -lSDL2 -lSDL2_image -g -fsanitize=address -o main && ./main
 // cmake . && make && ./main
 
+void shield_damage(int index){
+    // h: 72 = 72 / 4 = 18 hits
+    if(shields[index].rect.h - 4 != 0 ){
+        shields[index].rect.h -= 4;
+        shields[index].rect.y += 4;
+    }
+    else{ shields[index].destroyed = true; }
+}
+
 void player_move(Player* player, enum direction d){
     if(d == LEFT && player->rect.x > 12){
         player->rect.x -= 2;
@@ -50,7 +59,18 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
             for(int j = 0; j < 4; j++){
                 if(currentShot->rect.x >= shields[j].rect.x && currentShot->rect.x <= shields[j].rect.x + shields[j].rect.w
                 && currentShot->rect.y >= shields[j].rect.y && currentShot->rect.y <= shields[j].rect.y){
+                    if(shields[j].destroyed != true){
+                        dynarray_remove(projectilez, currentShot);
+                        shield_damage(j);
+                    }
+                }
+            }
+            for(int j = 0; j < projectilez->size; j++){
+                Shot* currentProjectile = (Shot*) projectilez->items[j];
+                if(currentProjectile->shooter == 1 && currentShot->rect.x >= currentProjectile->rect.x - 2 && currentShot->rect.x <= currentProjectile->rect.x + currentProjectile->rect.w + 2
+                && currentShot->rect.y >= currentProjectile->rect.y && currentShot->rect.y <= currentProjectile->rect.y + currentProjectile->rect.h){
                     dynarray_remove(projectilez, currentShot);
+                    dynarray_remove(projectilez, currentProjectile);
                 }
             }
             if(currentShot->rect.y == 12){ dynarray_remove(projectilez, currentShot); }
@@ -60,7 +80,10 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
             for(int j = 0; j < 4; j++){
                 if(currentShot->rect.x >= shields[j].rect.x && currentShot->rect.x <= shields[j].rect.x + shields[j].rect.w
                    && currentShot->rect.y >= shields[j].rect.y && currentShot->rect.y <= shields[j].rect.y){
-                    dynarray_remove(projectilez, currentShot);
+                    if(shields[j].destroyed != true){
+                        dynarray_remove(projectilez, currentShot);
+                        shield_damage(j);
+                    }
                 }
             }
             if(currentShot->rect.y == WIN_HEI - 24){ dynarray_remove(projectilez, currentShot); }
@@ -132,7 +155,21 @@ void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* ali
     }
 
     for(int i = 0; i < 4; i++){
-        SDL_RenderCopy(renderer, textures[8], NULL, &shieldz[i].rect);
+        if( shieldz[i].destroyed == false){
+            if(shieldz[i].rect.h <= 16){
+                SDL_SetTextureColorMod(textures[8], 255, 0, 0);
+            }
+            if(shieldz[i].rect.h > 16){
+                SDL_SetTextureColorMod(textures[8], 255, 128, 0);
+            }
+            if(shieldz[i].rect.h > 36){
+                SDL_SetTextureColorMod(textures[8], 255, 255, 0);
+            }
+            if(shieldz[i].rect.h > 56){
+                SDL_SetTextureColorMod(textures[8], 255, 255, 255);
+            }
+            SDL_RenderCopy(renderer, textures[8], NULL, &shieldz[i].rect);
+        }
     }
 
     SDL_RenderPresent(renderer);
@@ -193,8 +230,9 @@ int main()
     shields = (Shield *)malloc(sizeof(Shield) * 4);
     for(int s = 0; s < 4; ++s){
         shields[s].rect.w = 18 * 4;
-        shields[s].rect.h = 16 * 4;
+        shields[s].rect.h = 18 * 4;
         shields[s].rect.y = WIN_HEI - 144;
+        shields[s].destroyed = false;
     }
     shields[0].rect.x = 100; shields[1].rect.x = 275; shields[2].rect.x = 450; shields[3].rect.x = 625;
 
