@@ -14,6 +14,18 @@
 // gcc main.c aliens.c -lSDL2 -lSDL2_image -g -fsanitize=address -o main && ./main
 // cmake . && make && ./main
 
+void restart_lvl(dynarray* projectilez){
+    a_start_pos(aliens, 55);
+    for(int i = 0; i < 4; i++){
+        shields[i].rect.h = 18 * 4;
+        shields[i].rect.y = WIN_HEI - 144;
+    }
+    for(int k = 0; k < projectilez->size; k++){
+        Shot* current_projectile = (Shot*) projectilez->items[k];
+        dynarray_remove(projectilez, current_projectile);
+    }
+}
+
 void shield_damage(int index){
     // h: 72 = 72 / 4 = 18 hits
     if(shields[index].rect.h - 4 != 0 ){
@@ -53,6 +65,7 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                 && currentShot->rect.y >= aliens[j].rect.y && currentShot->rect.y <= aliens[j].rect.y && aliens[j].alive == true){
                     kill_alien(aliens, j, &SCORE);
                     dynarray_remove(projectilez, currentShot);
+                    DEAD_ALIENS++;
                     break;
                 }
             }
@@ -92,17 +105,13 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                currentShot->rect.y >= p->rect.y &&
                currentShot->rect.y <= p->rect.y + p->rect.h){
                 dynarray_remove(projectilez, currentShot);
-                a_start_pos(aliens, A_ROWS * A_IN_ROW);
                 (*lives)--;
-                for(int k = 0; k < projectilez->size; k++){
-                    Shot* current_projectile = (Shot*) projectilez->items[k];
-                    dynarray_remove(projectilez, current_projectile);
-                }
+                restart_lvl(projectilez);
                 if((*lives) == 0){
                     GAME = false;
                 }
             }
-            else{ currentShot->rect.y += 2; }
+            else{ currentShot->rect.y += 3; }
         }
     }
 }
@@ -150,6 +159,13 @@ void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* ali
             if(alienz[i].id >= 0 && alienz[i].id < 11){ index = 0; } // 0 - 10 (11)
             if(alienz[i].id >= 11 && alienz[i].id < 33){ index = 2; } // 11 - 32 (22)
             if(alienz[i].id >= 33 && alienz[i].id < 55){ index = 4; } // 33 - 54 (22)
+            if( alienz[i].rect.x >= p->rect.x &&
+                alienz[i].rect.x <= p->rect.x + p->rect.w &&
+                alienz[i].rect.y >= p->rect.y &&
+                alienz[i].rect.y <= p->rect.y + p->rect.h ){
+                restart_lvl(projectilez);
+                LIVES--;
+            }
             SDL_RenderCopy(renderer, textures[index + (TICK_COUNT % 2)], NULL, &alienz[i].rect);
         }
     }
@@ -166,7 +182,7 @@ void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* ali
                 SDL_SetTextureColorMod(textures[8], 255, 255, 0);
             }
             if(shieldz[i].rect.h > 56){
-                SDL_SetTextureColorMod(textures[8], 255, 255, 255);
+                SDL_SetTextureColorMod(textures[8], 0, 255, 0);
             }
             SDL_RenderCopy(renderer, textures[8], NULL, &shieldz[i].rect);
         }
@@ -318,19 +334,39 @@ int main()
 
                 render(rend, &cas, textures, aliens, font, &p, shields, &projectiles);
 
+                if(TICK_COUNT % 24 == 0){
+                    cas = 0;
+                    if(TICK - 5 > TICK_LIMIT){
+                        TICK -=5;
+                    }
+                    else{
+                        TICK = TICK_LIMIT;
+                    }
+                }
+
                 if(cas % 240 == 0){
                     alien_shoot(aliens, &projectiles);
                 }
-
                 if (cas % TICK == 0)
                 {
                     aliens_move(aliens, A_ROWS * A_IN_ROW, TICK_COUNT);
-                    //printf("cas: %d\ntick count: %d\n", cas, TICK_COUNT);
+                    printf("cas: %d\ntick count: %d\ntick: %d\n", cas, TICK_COUNT, TICK);
                     TICK_COUNT++;
                 }
                 cas++;
                 if(SHOOT_DELAY != 180){
                     SHOOT_DELAY++;
+                }
+                if(DEAD_ALIENS == 55){
+                    LVL++;
+                    if(TICK - 5 > TICK_LIMIT){
+                        TICK -=5;
+                    }
+                    else{
+                        TICK = TICK_LIMIT;
+                    }
+                    restart_lvl(&projectiles);
+                    DEAD_ALIENS = 0;
                 }
 
                 lastTime = currentTime;
@@ -341,6 +377,8 @@ int main()
         SDL_DestroyTexture(textures[i]);
 
     free_aliens(aliens);
+    free(shields);
+    dynarray_free(&projectiles);
     TTF_CloseFont(font);
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(rend);

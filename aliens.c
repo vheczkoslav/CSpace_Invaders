@@ -67,21 +67,32 @@ void aliens_move(Alien *aliens, int count, int tick){
             aliens[i].rect.x -= 6;
         }
         if(tick % 24 == 0){
-            aliens[i].rect.y += 8;
+            aliens[i].rect.y += 20;
         }
     }
 }
 
 void alien_shoot(Alien *aliens, dynarray* projectilez){
-    int index = rand() % 55;
+    int alive_index[55];
+    int length = 0;
+    for(int i = 0; i < 55; i++){
+        if(aliens[i].alive == true){
+            length++;
+            alive_index[length-1] = i;
+        }
+    }
+
+    int index = rand() % length;
+    int shooter = alive_index[index];
+
     Shot* s; s = (Shot*)malloc(sizeof(Shot));
-    if(index > 11){
-        s->rect.x = aliens[index].rect.x + 12;
+    if(shooter > 11){
+        s->rect.x = aliens[shooter].rect.x + 12;
     }
     else{
-        s->rect.x = aliens[index].rect.x + 20;
+        s->rect.x = aliens[shooter].rect.x + 20;
     }
-    s->rect.y = aliens[index].rect.y - 14;
+    s->rect.y = aliens[shooter].rect.y - 14;
     s->rect.w = 4;
     s->rect.h = 12;
     s->shooter = 1;

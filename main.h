@@ -14,10 +14,11 @@ const int WIN_HEI = 700;
 int SCORE = 0;
 int LVL = 1;
 int LIVES = 3;
+int DEAD_ALIENS = 0;
 
 int TICK = 90;
 int TICK_COUNT = 1;
-const int TICK_LIMIT = 30; // TICK is never going to be slower than this
+const int TICK_LIMIT = 20; // TICK is never going to be slower than this
 
 int SHOOT_DELAY = 180; // player can shoot one sec after last shot
 bool MOVING = false;
@@ -46,3 +47,4 @@ void info_text(SDL_Renderer *renderer, TTF_Font *font, char* text, int DATA, int
 void player_shoot(Player* player, dynarray* projectilez);
 void shoot_move(dynarray* projectilez, Player* p, int* lives);
 void shield_damage(int index);
+void restart_lvl(dynarray* projectilez);
