@@ -10,5 +10,5 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
-add_executable( main main.c aliens.c main.h aliens.h dynamic_array.c dynamic_array.h )
+add_executable( main main.c aliens.c main.h aliens.h dynamic_array.c dynamic_array.h)
 target_link_libraries( main SDL2 SDL2_image SDL2_ttf )

@@ -5,8 +5,11 @@
 #include "SDL2/SDL_mixer.h"
 
 Alien* aliens;
+Alien* UFO;
 
 bool GAME = false; // if game is false you are in menu, if true you are in game. You are in menu before start or after death.
+
+bool UFO_SPAWNED = false;
 
 const int WIN_WID = 800;
 const int WIN_HEI = 700;
@@ -41,10 +44,11 @@ typedef struct{
 
 Shield* shields;
 
-void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* alienz, TTF_Font* font, Player* p, Shield* shieldz, dynarray* projectilez);
+void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* alienz, TTF_Font* font, Player* p, Shield* shieldz, dynarray* projectilez, Alien *oopho);
 void player_move(Player* player, enum direction d);
 void info_text(SDL_Renderer *renderer, TTF_Font *font, char* text, int DATA, int r);
 void player_shoot(Player* player, dynarray* projectilez);
 void shoot_move(dynarray* projectilez, Player* p, int* lives);
 void shield_damage(int index);
 void restart_lvl(dynarray* projectilez);
+void load_textures(SDL_Texture *teksture[12], SDL_Renderer *rend);

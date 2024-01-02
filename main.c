@@ -11,8 +11,33 @@
 #include "aliens.h"
 #include <SDL2/SDL.h>
 
-// gcc main.c aliens.c -lSDL2 -lSDL2_image -g -fsanitize=address -o main && ./main
-// cmake . && make && ./main
+void load_textures(SDL_Texture *teksture[12], SDL_Renderer *rend){
+    SDL_Surface *tmp = IMG_Load("sprites/top1.png");
+    teksture[0] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/top2.png");
+    teksture[1] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/mid1.png");
+    teksture[2] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/mid2.png");
+    teksture[3] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/bot1.png");
+    teksture[4] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/bot2.png");
+    teksture[5] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/ufo.png");
+    teksture[6] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/player.png");
+    teksture[7] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/shield.png");
+    teksture[8] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/shot_pl.png");
+    teksture[9] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/shot_al.png");
+    teksture[10] = SDL_CreateTextureFromSurface(rend, tmp);
+    tmp = IMG_Load("sprites/menu.png");
+    teksture[11] = SDL_CreateTextureFromSurface(rend, tmp);
+    free(tmp);
+}
 
 void restart_lvl(dynarray* projectilez){
     a_start_pos(aliens, 55);
@@ -60,6 +85,17 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
     for(int i = 0; i < projectilez->size; i++){
         Shot* currentShot = (Shot*) projectilez->items[i];
         if(currentShot->shooter == 0){
+            if(UFO){
+                if (currentShot->rect.x >= UFO->rect.x &&
+                    currentShot->rect.x <= UFO->rect.x + UFO->rect.w
+                    && currentShot->rect.y >= UFO->rect.y && currentShot->rect.y <= UFO->rect.y &&
+                    UFO->alive == true) {
+                    UFO->alive = false;
+                    SCORE += UFO->score;
+                    dynarray_remove(projectilez, currentShot);
+                    break;
+                }
+            }
             for(int j = 0; j < A_ROWS * A_IN_ROW; j++){
                 if(currentShot->rect.x >= aliens[j].rect.x && currentShot->rect.x <= aliens[j].rect.x + aliens[j].rect.w
                 && currentShot->rect.y >= aliens[j].rect.y && currentShot->rect.y <= aliens[j].rect.y && aliens[j].alive == true){
@@ -71,7 +107,7 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
             }
             for(int j = 0; j < 4; j++){
                 if(currentShot->rect.x >= shields[j].rect.x && currentShot->rect.x <= shields[j].rect.x + shields[j].rect.w
-                && currentShot->rect.y >= shields[j].rect.y && currentShot->rect.y <= shields[j].rect.y){
+                && currentShot->rect.y >= shields[j].rect.y && currentShot->rect.y <= shields[j].rect.y + shields[j].rect.h){
                     if(shields[j].destroyed != true){
                         dynarray_remove(projectilez, currentShot);
                         shield_damage(j);
@@ -92,7 +128,7 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
         else{
             for(int j = 0; j < 4; j++){
                 if(currentShot->rect.x >= shields[j].rect.x && currentShot->rect.x <= shields[j].rect.x + shields[j].rect.w
-                   && currentShot->rect.y >= shields[j].rect.y && currentShot->rect.y <= shields[j].rect.y){
+                   && currentShot->rect.y >= shields[j].rect.y && currentShot->rect.y <= shields[j].rect.y + shields[j].rect.h){
                     if(shields[j].destroyed != true){
                         dynarray_remove(projectilez, currentShot);
                         shield_damage(j);
@@ -130,7 +166,7 @@ void info_text(SDL_Renderer *renderer, TTF_Font *font, char* text, int DATA, int
     SDL_DestroyTexture(buffer_texture); SDL_FreeSurface(buffer_surface);
 }
 
-void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* alienz, TTF_Font* font, Player* p, Shield* shieldz, dynarray* projectilez)
+void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* alienz, TTF_Font* font, Player* p, Shield* shieldz, dynarray* projectilez, Alien* oopho)
 {
     SDL_RenderClear(renderer);
 
@@ -187,6 +223,19 @@ void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* ali
             SDL_RenderCopy(renderer, textures[8], NULL, &shieldz[i].rect);
         }
     }
+    if (UFO_SPAWNED)
+    {
+            if (UFO->alive == true) {
+                SDL_RenderCopy(renderer, textures[6], NULL, &UFO->rect);
+                UFO->rect.x += 1;
+            }
+        if (UFO->rect.x + 2 == 800)
+        {
+            UFO->alive = false;
+            UFO_SPAWNED = false;
+            free(UFO);
+        }
+    }
 
     SDL_RenderPresent(renderer);
     return;
@@ -206,30 +255,7 @@ int main()
     SDL_Event event;
 
     SDL_Texture *textures[12];
-    SDL_Surface *tmp = IMG_Load("sprites/top1.png");
-    textures[0] = SDL_CreateTextureFromSurface(rend, tmp);
-    tmp = IMG_Load("sprites/top2.png");
-    textures[1] = SDL_CreateTextureFromSurface(rend, tmp);
-    tmp = IMG_Load("sprites/mid1.png");
-    textures[2] = SDL_CreateTextureFromSurface(rend, tmp);
-    tmp = IMG_Load("sprites/mid2.png");
-    textures[3] = SDL_CreateTextureFromSurface(rend, tmp);
-    tmp = IMG_Load("sprites/bot1.png");
-    textures[4] = SDL_CreateTextureFromSurface(rend, tmp);
-    tmp = IMG_Load("sprites/bot2.png");
-    textures[5] = SDL_CreateTextureFromSurface(rend, tmp);
-    tmp = IMG_Load("sprites/ufo.png");
-    textures[6] = SDL_CreateTextureFromSurface(rend, tmp);
-    tmp = IMG_Load("sprites/player.png");
-    textures[7] = SDL_CreateTextureFromSurface(rend, tmp);
-    tmp = IMG_Load("sprites/shield.png");
-    textures[8] = SDL_CreateTextureFromSurface(rend, tmp);
-    tmp = IMG_Load("sprites/shot_pl.png");
-    textures[9] = SDL_CreateTextureFromSurface(rend, tmp);
-    tmp = IMG_Load("sprites/shot_al.png");
-    textures[10] = SDL_CreateTextureFromSurface(rend, tmp);
-    tmp = IMG_Load("sprites/menu.png");
-    textures[11] = SDL_CreateTextureFromSurface(rend, tmp);
+    load_textures(textures, rend);
 
     int running = 1;
     int cas = 0;
@@ -332,7 +358,7 @@ int main()
                     SDL_Delay(targetFrameTime - deltaTime);
                 }
 
-                render(rend, &cas, textures, aliens, font, &p, shields, &projectiles);
+                render(rend, &cas, textures, aliens, font, &p, shields, &projectiles, UFO);
 
                 if(TICK_COUNT % 24 == 0){
                     cas = 0;
@@ -367,6 +393,18 @@ int main()
                     }
                     restart_lvl(&projectiles);
                     DEAD_ALIENS = 0;
+                }
+                if (TICK_COUNT % 48 == 0 && !UFO_SPAWNED)
+                {
+                    UFO = (Alien*)malloc(sizeof(Alien));
+                    UFO->rect.x = 0;
+                    UFO->rect.y = 40;
+                    UFO->rect.h = 6 * 4;
+                    UFO->rect.w = 14 * 4;
+                    UFO->alive = true;
+                    UFO->score = 100;
+                    UFO->a_type = UFO_SPECIAL;
+                    UFO_SPAWNED = true;
                 }
 
                 lastTime = currentTime;
