@@ -1,1 +1,1 @@
-/usr/bin/cc  -fsanitize=address CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/aliens.c.o CMakeFiles/main.dir/dynamic_array.c.o -o main  -lSDL2 -lSDL2_image -lSDL2_ttf 
+/usr/bin/cc -g  -fsanitize=address CMakeFiles/main.dir/main.c.o CMakeFiles/main.dir/aliens.c.o CMakeFiles/main.dir/dynamic_array.c.o -o main  -lSDL2 -lSDL2_image -lSDL2_ttf 

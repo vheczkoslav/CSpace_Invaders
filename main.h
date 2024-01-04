@@ -23,7 +23,7 @@ int TICK = 90;
 int TICK_COUNT = 1;
 const int TICK_LIMIT = 20; // TICK is never going to be slower than this
 
-int SHOOT_DELAY = 180; // player can shoot one sec after last shot
+int SHOOT_DELAY = 30; // player can shoot one sec after last shot
 bool MOVING = false;
 enum direction {NONE, LEFT, RIGHT};
 
@@ -38,9 +38,31 @@ typedef struct{
 
 typedef struct{
     SDL_Rect rect;
-    // (18x16) * 4
     bool destroyed;
+}my_rect;
+
+typedef struct{
+    my_rect rect[16][18];
+    // (18x16) * 4
 }Shield;
+int SHIELD_COUNT = 4;
+
+char shield_template[16][18] = {"....##########....",
+                                "...############...",
+                                "..##############..",
+                                ".################.",
+                                "##################",
+                                "##################",
+                                "##################",
+                                "##################",
+                                "##################",
+                                "##################",
+                                "##################",
+                                "##################",
+                                "######......######",
+                                "#####........#####",
+                                "####..........####",
+                                "###............###"};
 
 Shield* shields;
 
@@ -49,6 +71,6 @@ void player_move(Player* player, enum direction d);
 void info_text(SDL_Renderer *renderer, TTF_Font *font, char* text, int DATA, int r);
 void player_shoot(Player* player, dynarray* projectilez);
 void shoot_move(dynarray* projectilez, Player* p, int* lives);
-void shield_damage(int index);
 void restart_lvl(dynarray* projectilez);
 void load_textures(SDL_Texture *teksture[12], SDL_Renderer *rend);
+void create_shield(Shield* shield, int x, int y);
