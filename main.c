@@ -10,6 +10,7 @@
 #include "main.h"
 #include "aliens.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
 
 void create_shield(Shield* shield, int x, int y) {
     for (int j = 0; j < 16; j++) {
@@ -64,6 +65,10 @@ void restart_lvl(dynarray* projectilez){
         Shot* current_projectile = (Shot*) projectilez->items[k];
         dynarray_remove(projectilez, current_projectile);
     }
+    create_shield(&shields[0], 100, WIN_HEI - 144);
+    create_shield(&shields[1], 275, WIN_HEI - 144);
+    create_shield(&shields[2], 450, WIN_HEI - 144);
+    create_shield(&shields[3], 625, WIN_HEI - 144);
 }
 
 void player_move(Player* player, enum direction d){
@@ -109,6 +114,7 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                            && currentShot->rect.y >= shields[0].rect[y][x].rect.y && currentShot->rect.y <= shields[0].rect[y][x].rect.y + shields[0].rect[y][x].rect.h
                            && !shields[0].rect[y][x].destroyed){
                             shields[0].rect[y][x].destroyed = true;
+                            if(shields[0].rect[y - 1][x].destroyed != true){ shields[0].rect[y - 1][x].destroyed = true; }
                             dynarray_remove(projectilez, currentShot);
                         }
                     }
@@ -121,6 +127,7 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                            && currentShot->rect.y >= shields[1].rect[y][x].rect.y && currentShot->rect.y <= shields[1].rect[y][x].rect.y + shields[1].rect[y][x].rect.h
                            && !shields[1].rect[y][x].destroyed){
                             shields[1].rect[y][x].destroyed = true;
+                            if(shields[0].rect[y - 1][x].destroyed != true){ shields[1].rect[y - 1][x].destroyed = true; }
                             dynarray_remove(projectilez, currentShot);
                         }
                     }
@@ -133,6 +140,7 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                            && currentShot->rect.y >= shields[2].rect[y][x].rect.y && currentShot->rect.y <= shields[2].rect[y][x].rect.y + shields[2].rect[y][x].rect.h
                            && !shields[2].rect[y][x].destroyed){
                             shields[2].rect[y][x].destroyed = true;
+                            if(shields[0].rect[y - 1][x].destroyed != true){ shields[2].rect[y - 1][x].destroyed = true; }
                             dynarray_remove(projectilez, currentShot);
                         }
                     }
@@ -145,6 +153,7 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                            && currentShot->rect.y >= shields[3].rect[y][x].rect.y && currentShot->rect.y <= shields[3].rect[y][x].rect.y + shields[3].rect[y][x].rect.h
                            && !shields[3].rect[y][x].destroyed){
                             shields[1].rect[y][x].destroyed = true;
+                            if(shields[0].rect[y - 1][x].destroyed != true){ shields[3].rect[y - 1][x].destroyed = true; }
                             dynarray_remove(projectilez, currentShot);
                         }
                     }
@@ -178,6 +187,7 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                            && currentShot->rect.y >= shields[0].rect[y][x].rect.y && currentShot->rect.y <= shields[0].rect[y][x].rect.y + shields[0].rect[y][x].rect.h
                            && !shields[0].rect[y][x].destroyed){
                             shields[0].rect[y][x].destroyed = true;
+                            if(shields[0].rect[y + 1][x].destroyed != true){ shields[0].rect[y + 1][x].destroyed = true; }
                             dynarray_remove(projectilez, currentShot);
                         }
                     }
@@ -190,6 +200,7 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                            && currentShot->rect.y >= shields[1].rect[y][x].rect.y && currentShot->rect.y <= shields[1].rect[y][x].rect.y + shields[1].rect[y][x].rect.h
                            && !shields[1].rect[y][x].destroyed){
                             shields[1].rect[y][x].destroyed = true;
+                            if(shields[1].rect[y + 1][x].destroyed != true){ shields[1].rect[y + 1][x].destroyed = true; }
                             dynarray_remove(projectilez, currentShot);
                         }
                     }
@@ -202,6 +213,7 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                            && currentShot->rect.y >= shields[2].rect[y][x].rect.y && currentShot->rect.y <= shields[2].rect[y][x].rect.y + shields[2].rect[y][x].rect.h
                            && !shields[2].rect[y][x].destroyed){
                             shields[2].rect[y][x].destroyed = true;
+                            if(shields[2].rect[y + 1][x].destroyed != true){ shields[2].rect[y + 1][x].destroyed = true; }
                             dynarray_remove(projectilez, currentShot);
                         }
                     }
@@ -214,6 +226,7 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                            && currentShot->rect.y >= shields[3].rect[y][x].rect.y && currentShot->rect.y <= shields[3].rect[y][x].rect.y + shields[3].rect[y][x].rect.h
                            && !shields[3].rect[y][x].destroyed){
                             shields[1].rect[y][x].destroyed = true;
+                            if(shields[3].rect[y + 1][x].destroyed != true){ shields[3].rect[y + 1][x].destroyed = true; }
                             dynarray_remove(projectilez, currentShot);
                         }
                     }
@@ -227,8 +240,23 @@ void shoot_move(dynarray* projectilez, Player* p, int* lives){
                 dynarray_remove(projectilez, currentShot);
                 (*lives)--;
                 restart_lvl(projectilez);
-                if((*lives) == 0){
+                if((*lives) == 0){ // PLAYER DEATH BY PROJECTILES BLOCK
+                    if(Mix_PlayingMusic() == 1){ Mix_PauseMusic(); }
                     GAME = false;
+                    TICK_COUNT = 0;
+                    LIVES = 3;
+                    LVL = 1;
+                    /*for(int i = 0; i < sizeof(HIGH_SCORE) / sizeof(int); i++){
+                        if(SCORE > HIGH_SCORE[i]){
+                            HIGH_SCORE[i] = SCORE;
+                            for(int j = i + 1; j < sizeof(HIGH_SCORE) / sizeof(int) - 1; j++){
+                                HIGH_SCORE[j + 1] = HIGH_SCORE[i];
+                            }
+                            break;
+                        }
+                    }*/
+                    if(DEBUG){ printf("HS1: %d\nHS2: %d\nHS3: %d\nHS4: %d\nHS5: %d\n", HIGH_SCORE[0], HIGH_SCORE[1], HIGH_SCORE[2], HIGH_SCORE[3], HIGH_SCORE[4]); }
+                    SCORE = 0;
                 }
             }
             else{ currentShot->rect.y += 3; }
@@ -324,9 +352,13 @@ void render(SDL_Renderer *renderer, int* cas, SDL_Texture** textures, Alien* ali
     return;
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    SDL_Init(SDL_INIT_VIDEO);
+    if(argc == 2 && strcmp(argv[1], "-d") == 0){
+        DEBUG = true;
+    }
+
+    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
     SDL_DisplayMode SDL_DM;
     SDL_GetCurrentDisplayMode(0, &SDL_DM);
     int monitor_width = SDL_DM.w;
@@ -336,6 +368,18 @@ int main()
     SDL_Window *window = SDL_CreateWindow("Space Invaders - HEC0083", window_x, window_y, WIN_WID, WIN_HEI, SDL_WINDOW_SHOWN);
     SDL_Renderer *rend = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     SDL_Event event;
+    Mix_Init(MIX_INIT_MP3
+    | MIX_INIT_OGG);
+    if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0){ return 1; };
+    Mix_Music * music = Mix_LoadMUS("sounds/Space_Invaders_Music.ogg");
+
+    /*FILE* hs = fopen("highscores.txt", "rw");
+    char* buffer = (char*)malloc(100);
+    while(!feof(hs)) {
+        fread(buffer, 1, sizeof(buffer), hs);
+        printf("%s\n", buffer);
+    }
+    fclose(hs);*/
 
     SDL_Texture *textures[12];
     load_textures(textures, rend);
@@ -371,6 +415,8 @@ int main()
     SDL_Rect menu_rect = {0,0,800,700};
     int mx = 0, my = 0;
 
+        enum MENU {MENU, HS};
+        enum MENU state = MENU;
         enum direction dir = NONE;
         while (running == 1)
         {
@@ -384,6 +430,10 @@ int main()
                     if( event.type == SDL_KEYDOWN ){
                         if( event.key.keysym.sym == SDLK_SPACE){
                             GAME = true;
+                        }
+                        if(event.key.keysym.sym == SDLK_ESCAPE){
+                            if(state == MENU){ state = HS;  }
+                            else if(state == HS){ state = MENU;  }
                         }
                     }
                     else if ( event.type == SDL_MOUSEBUTTONDOWN ){
@@ -402,12 +452,21 @@ int main()
                     SDL_Delay(targetFrameTime - deltaTime);
                 }
 
-                SDL_RenderCopy(rend, textures[11], NULL, &menu_rect);
+                if(state == MENU){ SDL_RenderCopy(rend, textures[11], NULL, &menu_rect); }
                 SDL_RenderPresent(rend);
 
                 lastTime = currentTime;
             }
             else{
+                if(cas == 0){
+                    if(Mix_PlayingMusic() == 0){
+                        Mix_Volume(1, 100);
+                        Mix_PlayMusic(music, -1);
+                    }
+                    else{
+                        Mix_ResumeMusic();
+                    }
+                };
                 while (SDL_PollEvent(&event))
                 {
                     if (event.type == SDL_QUIT)
@@ -416,6 +475,10 @@ int main()
                     }
                     else if ( event.type == SDL_KEYDOWN ) { // key pressed down
                         if ( event.key.keysym.sym == SDLK_r ) {
+                            restart_lvl(&projectiles);
+                            SCORE = 0; LIVES = 3;
+                        }
+                        if( event.key.keysym.sym == SDLK_ESCAPE ){
                             running = 0;
                         }
                         if( event.key.keysym.sym == SDLK_LEFT ){
@@ -427,9 +490,9 @@ int main()
                     }
                     else if( event.type == SDL_KEYUP ){
                         if( event.key.keysym.sym == SDLK_SPACE ){
-                            if(SHOOT_DELAY == 30){
+                            if(SHOOT_REFRESH == SHOOT_DELAY){
                                 player_shoot(&p, &projectiles);
-                                SHOOT_DELAY = 0;
+                                SHOOT_REFRESH = 0;
                             }
                         }
                         if( event.key.keysym.sym == SDLK_LEFT || event.key.keysym.sym == SDLK_RIGHT){
@@ -466,11 +529,11 @@ int main()
                 if (cas % TICK == 0)
                 {
                     aliens_move(aliens, A_ROWS * A_IN_ROW, TICK_COUNT);
-                    printf("cas: %d\ntick count: %d\ntick: %d\n", cas, TICK_COUNT, TICK);
+                    if(DEBUG){ printf("cas: %d\ntick count: %d\ntick: %d\n", cas, TICK_COUNT, TICK); }
                     TICK_COUNT++;
                 }
-                if(SHOOT_DELAY != 30){
-                    SHOOT_DELAY++;
+                if(SHOOT_REFRESH != SHOOT_DELAY){
+                    SHOOT_REFRESH++;
                 }
                 cas++;
                 if(DEAD_ALIENS == 55){
@@ -507,6 +570,7 @@ int main()
     free_aliens(aliens);
     free(shields);
     dynarray_free(&projectiles);
+    if(UFO){ free(UFO); }
     TTF_CloseFont(font);
     SDL_DestroyWindow(window);
     SDL_DestroyRenderer(rend);

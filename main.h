@@ -7,6 +7,7 @@
 Alien* aliens;
 Alien* UFO;
 
+bool DEBUG = false;
 bool GAME = false; // if game is false you are in menu, if true you are in game. You are in menu before start or after death.
 
 bool UFO_SPAWNED = false;
@@ -14,6 +15,7 @@ bool UFO_SPAWNED = false;
 const int WIN_WID = 800;
 const int WIN_HEI = 700;
 
+int HIGH_SCORE[5] = {0, 0, 0, 0,0};
 int SCORE = 0;
 int LVL = 1;
 int LIVES = 3;
@@ -23,7 +25,7 @@ int TICK = 90;
 int TICK_COUNT = 1;
 const int TICK_LIMIT = 20; // TICK is never going to be slower than this
 
-int SHOOT_DELAY = 30; // player can shoot one sec after last shot
+const int SHOOT_DELAY = 45; int SHOOT_REFRESH = 30;
 bool MOVING = false;
 enum direction {NONE, LEFT, RIGHT};
 
